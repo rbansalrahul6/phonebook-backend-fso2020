@@ -25,6 +25,10 @@ let persons = [
 
   const app = express()
 
+  app.use(express.json())
+
+  const getId = () => Math.floor(Math.random() * 100)
+
   app.get('/', (req, res) => {
       res.send('<h1>Phonebook</h1>')
   })
@@ -54,6 +58,32 @@ let persons = [
       const id = Number(req.params.id)
       persons = persons.filter(p => p.id !== id)
       res.status(204).end()
+  })
+
+  app.post('/api/persons', (req, res) => {
+      const body = req.body
+
+      if (!body.name || !body.name) {
+          return res.status(400).json({
+              error: 'content missing'
+          })
+      }
+
+      const hasDuplicate = persons.some(p => p.name === body.name)
+      if (hasDuplicate) {
+          return res.status(400).json({
+              error: 'name must be unique'
+          })
+      }
+
+      const person = {
+          name: body.name,
+          number: body.number,
+          id: getId()
+      }
+
+      persons = persons.concat(person)
+      res.json(person)
   })
 
   const PORT = 3001
